@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Tmux
+GenericName=Terminal Multiplexer
+Icon=tmux
+Exec=tmux.bash
+Terminal=true
+Categories=Utility;ConsoleOnly;

@@ -1,0 +1,88 @@
+{
+    automerge: true,
+    extends: ["config:recommended", ":dependencyDashboard"],
+    platformAutomerge: true,
+    automergeType: "pr",
+    commitMessagePrefix: "chore({{depName}}):",
+    commitMessageAction: "bump",
+    commitMessageTopic: "{{depName}} version",
+    separateMajorMinor: false,
+    prHourlyLimit: 0,
+    prConcurrentLimit: 0,
+    branchConcurrentLimit: 0,
+    rebaseWhen: "behind-base-branch",
+    enabledManagers: [
+        "custom.regex",
+    ],
+    customManagers: [
+        {
+            fileMatch: ["^packages/tmux.yaml$"],
+            matchStringsStrategy: "combination",
+            matchStrings: [
+                "name:\\s(?<depName>.*?)\\n",
+                "version:\\s(?<currentValue>.*?)\\n",
+            ],
+            datasourceTemplate: "github-releases",
+            versioningTemplate: "loose",
+            packageNameTemplate: "tmux/tmux",
+        },
+        {
+            fileMatch: ["^packages/ncurses.yaml$"],
+            matchStringsStrategy: "combination",
+            matchStrings: [
+                "name:\\s(?<depName>.*?)\\n",
+                "version:\\s(?<currentValue>.*?)\\n",
+            ],
+            datasourceTemplate: "custom.html",
+            registryUrlTemplate: "https://invisible-mirror.net/archives/ncurses/",
+            versioningTemplate: "semver-coerced",
+            extractVersionTemplate: "^ncurses-(?<version>.*?)\\.tar\\.gz$",
+        },
+        {
+            fileMatch: ["^packages/utf8proc.yaml$"],
+            matchStringsStrategy: "combination",
+            matchStrings: [
+                "name:\\s(?<depName>.*?)\\n",
+                "version:\\s(?<currentValue>.*?)\\n",
+            ],
+            datasourceTemplate: "github-releases",
+            versioningTemplate: "semver",
+            packageNameTemplate: "JuliaStrings/utf8proc",
+        },
+        {
+            fileMatch: ["^packages/libevent.yaml$"],
+            matchStringsStrategy: "combination",
+            matchStrings: [
+                "name:\\s(?<depName>.*?)\\n",
+                "version:\\s(?<currentValue>.*?)\\n",
+            ],
+            datasourceTemplate: "github-releases",
+            versioningTemplate: "loose",
+            packageNameTemplate: "libevent/libevent",
+        },
+        {
+            fileMatch: ["^packages/utempter.yaml$"],
+            matchStringsStrategy: "combination",
+            matchStrings: [
+                "name:\\s(?<depName>.*?)\\n",
+                "version:\\s(?<currentValue>.*?)\\n",
+            ],
+            datasourceTemplate: "github-tags",
+            packageNameTemplate: "altlinux/libutempter",
+            versioningTemplate: "loose",
+        },
+    ],
+    customDatasources: {
+        html: {
+            format: "html",
+        },
+    },
+    packageRules: [
+        {
+            matchDepNames: ["tmux"],
+            commitMessagePrefix: "feat({{depName}}):",
+            commitMessageAction: "update",
+            commitBody: "Release-As: {{newVersion}}",
+        },
+    ],
+}
