@@ -13,21 +13,17 @@ DOCKER_CMD := docker run --rm --user $(shell id -u):$(shell id -g) -v $(CURDIR):
 all: $(build_dir)/Tmux-x86_64.AppImage
 
 # build appimage
-$(build_dir)/Tmux-x86_64.AppImage: $(appimage_dir)/usr/bin/tmux | $(build_dir)/linuxdeploy-x86_64.AppImage $(appimage_dir)/usr/share/applications/tmux.desktop $(appimage_dir)/usr/share/icons/hicolor/scalable/apps/tmux.svg $(appimage_dir)/usr/bin/tmux.bash
+$(build_dir)/Tmux-x86_64.AppImage: $(appimage_dir)/usr/bin/tmux | $(build_dir)/linuxdeploy-x86_64.AppImage $(appimage_dir)/usr/share/applications/tmux.desktop $(appimage_dir)/usr/share/icons/hicolor/scalable/apps/tmux.svg
 	@cd $(build_dir); \
 		LD_LIBRARY_PATH=$(appimage_dir)/usr/lib \
-		$(build_dir)/linuxdeploy-x86_64.AppImage --appdir $(appimage_dir) --output appimage || $(MAKE) linuxdeploy_extract -C $(CURDIR)
+		$(build_dir)/linuxdeploy-x86_64.AppImage --appdir $(appimage_dir) --output appimage --custom-apprun=$(CURDIR)/data/tmux.bash || $(MAKE) linuxdeploy_extract -C $(CURDIR)
 
-linuxdeploy_extract: $(appimage_dir)/usr/bin/tmux | $(build_dir)/linuxdeploy-x86_64.AppImage $(build_dir)/linuxdeploy $(appimage_dir)/usr/share/applications/tmux.desktop $(appimage_dir)/usr/share/icons/hicolor/scalable/apps/tmux.svg $(appimage_dir)/usr/bin/tmux.bash
+linuxdeploy_extract: $(appimage_dir)/usr/bin/tmux | $(build_dir)/linuxdeploy-x86_64.AppImage $(build_dir)/linuxdeploy $(appimage_dir)/usr/share/applications/tmux.desktop $(appimage_dir)/usr/share/icons/hicolor/scalable/apps/tmux.svg
 	@cd $(build_dir)/linuxdeploy; \
 	../linuxdeploy-x86_64.AppImage --appimage-extract; \
 	cd $(build_dir); \
 	LD_LIBRARY_PATH=$(appimage_dir)/usr/lib \
-	$(build_dir)/linuxdeploy/squashfs-root/AppRun --appdir $(appimage_dir) --output appimage
-
-$(appimage_dir)/usr/bin/tmux.bash:
-	@mkdir -p $(appimage_dir)/usr/bin
-	@cp $(CURDIR)/data/tmux.bash $(appimage_dir)/usr/bin
+	$(build_dir)/linuxdeploy/squashfs-root/AppRun --appdir $(appimage_dir) --output appimage  --custom-apprun=$(CURDIR)/data/tmux.bash
 
 $(appimage_dir)/usr/share/applications/tmux.desktop:
 	@mkdir -p $(appimage_dir)/usr/share/applications

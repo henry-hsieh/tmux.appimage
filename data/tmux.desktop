@@ -4,6 +4,6 @@ Version=1.0
 Name=Tmux
 GenericName=Terminal Multiplexer
 Icon=tmux
-Exec=tmux.bash
+Exec=tmux
 Terminal=true
 Categories=Utility;ConsoleOnly;
