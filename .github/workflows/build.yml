@@ -92,7 +92,7 @@ jobs:
 
       - name: Download artifact
         id: download_release_artifact
-        if: ${{ steps.create_release.outputs.release_created }}
+        if: ${{ steps.create_release.outputs.release_created == 'true' }}
         uses: actions/download-artifact@v4
         with:
           name: tmux
