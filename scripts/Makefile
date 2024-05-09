@@ -31,7 +31,7 @@ $(build_dir)/tmux-$(tmux_ver)/tmux: $(runtime_libs_src) | $(build_dir)/tmux-$(tm
 		LIBNCURSESW_LIBS="  $(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --libs   $(build_dir)/deps/lib/pkgconfig/ncursesw.pc)" \
 		LIBTINFO_LIBS="     $(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --libs   $(build_dir)/deps/lib/pkgconfig/tinfow.pc  )" \
 		LIBEVENT_LIBS="     $(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --libs   $(build_dir)/deps/lib/pkgconfig/libevent.pc)" \
-		LIBUTF8PROC_LIBS="  -I$(build_dir)/deps/lib -lutf8proc                                                                                       " \
+		LIBUTF8PROC_LIBS="  -L$(build_dir)/deps/lib -lutf8proc                                                                                       " \
 		./configure --prefix=$(appimage_dir)/usr --enable-utempter --enable-utf8proc --enable-sixel; \
 		$(MAKE)
 
