@@ -84,9 +84,9 @@ jobs:
         run: |
           release=$(git log --format=%B $GITHUB_SHA -1 | grep "Release-As" | head -n 1 | sed 's/Release-As: //g')
           if [[ "$release" != "" ]]; then
-            gh release create v$release -t "v$release"
             echo "release_created=true" >> $GITHUB_OUTPUT
             echo "tag_name=v$release" >> $GITHUB_OUTPUT
+            gh release create v$release -t "v$release"
           else
             echo "release_created=false" >> $GITHUB_OUTPUT
             echo "tag_name=null" >> $GITHUB_OUTPUT
