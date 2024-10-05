@@ -13,7 +13,7 @@ runtime_libs := libncursesw.so libtinfow.so libutempter.so libevent.so libutf8pr
 runtime_libs_src := $(addprefix $(build_dir)/deps/lib/,$(runtime_libs))
 runtime_libs_dst := $(addprefix $(appimage_dir)/usr/lib/,$(runtime_libs))
 
-all: $(appimage_dir)/usr/bin/tmux $(runtime_libs_dst) $(appimage_dir)/usr/share/terminfo
+all: $(appimage_dir)/usr/bin/tmux $(runtime_libs_dst) $(appimage_dir)/usr/share/terminfo $(appimage_dir)/usr/bin/tput
 
 # tmux
 $(appimage_dir)/usr/bin/tmux: $(build_dir)/tmux-$(tmux_ver)/tmux
@@ -39,6 +39,10 @@ $(appimage_dir)/usr/share/terminfo: $(build_dir)/deps/lib/libncursesw.so
 	@cd $(build_dir)/ncurses-$(ncurses_ver); \
 		mkdir -p $@; \
 		LD_LIBRARY_PATH=$(build_dir)/deps/lib ./progs/tic ./misc/terminfo.src -o $@
+
+$(appimage_dir)/usr/bin/tput: $(appimage_dir)/usr/bin/tmux
+	@cd $(build_dir)/ncurses-$(ncurses_ver); \
+		cp ./progs/tput $@
 
 $(build_dir)/deps/lib/libncursesw.so: | $(build_dir)/ncurses-$(ncurses_ver).tar.gz $(build_dir)/deps
 	@cd $(build_dir)/ncurses-$(ncurses_ver); \
