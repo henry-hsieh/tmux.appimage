@@ -29,7 +29,7 @@
                 'version:\\s(?<currentValue>.*?)\\n',
             ],
             datasourceTemplate: 'github-releases',
-            versioningTemplate: 'loose',
+            versioningTemplate: "regex:^(?<major>\\d+)(\\.(?<minor>\\d+))((?<patch>[a-z]))?$",
             packageNameTemplate: 'tmux/tmux',
         },
         {
