@@ -3,6 +3,7 @@ build_dir ?= $(CURDIR)/build
 appimage_dir ?= $(build_dir)/AppDir
 install_prefix := $(appimage_dir)/usr
 packages_dir ?= $(CURDIR)/packages
+scripts_dir ?= $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 tmux_ver := $(shell cat $(packages_dir)/tmux.yaml | grep version | sed 's/.\+:\s//g')
 ncurses_ver := $(shell cat $(packages_dir)/ncurses.yaml | grep version | sed 's/.\+:\s//g')
 utempter_ver := $(shell cat $(packages_dir)/utempter.yaml | grep version | sed 's/.\+:\s//g')
@@ -21,17 +22,18 @@ $(appimage_dir)/usr/bin/tmux: $(build_dir)/tmux-$(tmux_ver)/tmux
 
 $(build_dir)/tmux-$(tmux_ver)/tmux: $(runtime_libs_src) | $(build_dir)/tmux-$(tmux_ver).tar.xz
 	@cd $(build_dir)/tmux-$(tmux_ver); \
+		$(scripts_dir)/patch.sh tmux $(tmux_ver) $(build_dir); \
 		export LD_LIBRARY_PATH="$(build_dir)/deps/lib:${LD_LIBRARY_PATH}"; \
-		CFLAGS="            -I$(build_dir)/deps/include                                                                                              " \
-		LIBNCURSESW_CFLAGS="$(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --cflags $(build_dir)/deps/lib/pkgconfig/ncursesw.pc)" \
-		LIBTINFO_CFLAGS="   $(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --cflags $(build_dir)/deps/lib/pkgconfig/tinfow.pc  )" \
-		LIBEVENT_CFLAGS="   $(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --cflags $(build_dir)/deps/lib/pkgconfig/libevent.pc)" \
-		LIBUTF8PROC_CFLAGS="-I$(build_dir)/deps/include                                                                                              " \
-		LDFLAGS="           -L$(build_dir)/deps/lib -lutempter                                                                                       " \
-		LIBNCURSESW_LIBS="  $(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --libs   $(build_dir)/deps/lib/pkgconfig/ncursesw.pc)" \
-		LIBTINFO_LIBS="     $(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --libs   $(build_dir)/deps/lib/pkgconfig/tinfow.pc  )" \
-		LIBEVENT_LIBS="     $(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --libs   $(build_dir)/deps/lib/pkgconfig/libevent.pc)" \
-		LIBUTF8PROC_LIBS="  -L$(build_dir)/deps/lib -lutf8proc                                                                                       " \
+		CFLAGS="            -I$(build_dir)/deps/include                                                                                                 " \
+		LIBNCURSESW_CFLAGS="$(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --cflags $(build_dir)/deps/lib/pkgconfig/ncursesw.pc   )" \
+		LIBTINFO_CFLAGS="   $(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --cflags $(build_dir)/deps/lib/pkgconfig/tinfow.pc     )" \
+		LIBEVENT_CFLAGS="   $(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --cflags $(build_dir)/deps/lib/pkgconfig/libevent.pc   )" \
+		LIBUTF8PROC_CFLAGS="$(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --cflags $(build_dir)/deps/lib/pkgconfig/libutf8proc.pc)" \
+		LDFLAGS="           -L$(build_dir)/deps/lib -lutempter                                                                                          " \
+		LIBNCURSESW_LIBS="  $(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --libs   $(build_dir)/deps/lib/pkgconfig/ncursesw.pc   )" \
+		LIBTINFO_LIBS="     $(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --libs   $(build_dir)/deps/lib/pkgconfig/tinfow.pc     )" \
+		LIBEVENT_LIBS="     $(shell PKG_CONFIG_PATH=$(build_dir)/deps/lib/pkgconfig/ pkg-config --libs   $(build_dir)/deps/lib/pkgconfig/libevent.pc   )" \
+		LIBUTF8PROC_LIBS="  -L$(build_dir)/deps/lib -lutf8proc                                                                                          " \
 		./configure --prefix=$(appimage_dir)/usr --enable-utempter --enable-utf8proc --enable-sixel; \
 		$(MAKE)
 
@@ -62,6 +64,7 @@ $(build_dir)/deps/lib/libutempter.so: | $(build_dir)/libutempter-$(utempter_ver)
 
 $(build_dir)/deps/lib/libevent.so: | $(build_dir)/libevent-$(libevent_ver).tar.gz $(build_dir)/deps
 	@cd $(build_dir)/libevent-$(libevent_ver); \
+		$(scripts_dir)/patch.sh libevent $(libevent_ver) $(build_dir); \
 		mkdir -p build; \
 		cd build; \
 		cmake ../ -DCMAKE_INSTALL_PREFIX=$(build_dir)/deps -DEVENT__DISABLE_OPENSSL=ON -DEVENT__DISABLE_TESTS=ON; \
