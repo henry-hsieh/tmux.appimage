@@ -29,7 +29,8 @@
                 'version:\\s(?<currentValue>.*?)\\n',
             ],
             datasourceTemplate: 'github-releases',
-            versioningTemplate: "regex:^(?<major>\\d+)(\\.(?<minor>\\d+))((?<patch>[a-z]))?$",
+            versioningTemplate: 'loose',
+            extractVersionTemplate: '^(?<version>\\d+\\.\\d+[a-z]?)$',
             packageNameTemplate: 'tmux/tmux',
         },
         {
@@ -100,6 +101,7 @@
             matchDepNames: [
                 'tmux',
             ],
+            ignoreUnstable: false,
             commitMessagePrefix: 'feat({{depName}}):',
             commitMessageAction: 'update',
             commitBody: 'Release-As: {{newVersion}}',
