@@ -15,7 +15,7 @@ if ! $($tmux --appimage-help >/dev/null 2>&1); then
   exit 2
 fi
 
-appimage_version=$($tmux --version)
+appimage_version=$($tmux -V)
 fail=$?
 
 if [ $fail -ne 0 ]; then

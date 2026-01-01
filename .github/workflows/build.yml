@@ -39,7 +39,16 @@ jobs:
     needs: build
     strategy:
       matrix:
-        distro: ["ubuntu:xenial", "ubuntu:bionic", "ubuntu:focal", "ubuntu:latest", "centos:7", "centos:8", "debian:latest", "fedora:latest", "archlinux:latest"]
+        include:
+          - { image: "ubuntu:xenial"   , manager: 'apt'    }
+          - { image: "ubuntu:bionic"   , manager: 'apt'    }
+          - { image: "ubuntu:focal"    , manager: 'apt'    }
+          - { image: "ubuntu:latest"   , manager: 'apt'    }
+          - { image: "oraclelinux:7"   , manager: 'yum'    }
+          - { image: "oraclelinux:8"   , manager: 'dnf'    }
+          - { image: "debian:latest"   , manager: 'apt'    }
+          - { image: "fedora:latest"   , manager: 'dnf'    }
+          - { image: "archlinux:latest", manager: 'pacman' }
 
     steps:
       - name: Checkout repository
@@ -55,10 +64,20 @@ jobs:
         run: chmod +x build/Tmux-x86_64.AppImage
 
       - name: Pull Docker image
-        run: docker pull ${{ matrix.distro }}
+        run: docker pull ${{ matrix.image }}
+
+      - name: Install dependencies
+        run: |
+          if [[ "${{ matrix.manager }}" == "apt" ]]; then
+            echo "PREREQUISITE=apt update -y; apt install -y fuse libfuse2" >> $GITHUB_ENV
+          elif [[ "${{ matrix.manager }}" == "yum" || "${{ matrix.manager }}" == "dnf" ]]; then
+            echo "PREREQUISITE=${{ matrix.manager }} install -y fuse fuse-libs" >> $GITHUB_ENV
+          elif [[ "${{ matrix.manager }}" == "pacman" ]]; then
+            echo "PREREQUISITE=pacman -Sy --noconfirm fuse" >> $GITHUB_ENV
+          fi
 
       - name: Test in Docker container
-        run: ./scripts/test.sh ${{ matrix.distro }}
+        run: docker run -t --privileged -v $(pwd):$(pwd) -w $(pwd) ${{ matrix.image }} bash -i +m -e -c "eval \"${{ env.PREREQUISITE }}\"; TERM=tmux-256color ./scripts/test_tmux.sh build/Tmux-x86_64.AppImage $(cat packages/tmux.yaml | grep version | sed 's/.\+:\s//g')"
 
   release:
     name: Release
