@@ -15,10 +15,12 @@ if ! $($tmux --appimage-help >/dev/null 2>&1); then
   exit 2
 fi
 
+use_appimage=0
 appimage_version=$($tmux -V)
 fail=$?
 
 if [ $fail -ne 0 ]; then
+  use_appimage=1
   cd $(dirname "$tmux")
   ./$(basename $tmux) --appimage-extract
   appimage_version=$(./squashfs-root/AppRun -V)
@@ -32,7 +34,7 @@ fi
 $tmux new-session ';' detach ';' kill-server
 fail=$?
 
-if [ $fail -ne 0 ]; then
+if [ $fail -ne 0 ] && [ $use_appimage -eq 1 ]; then
   ./squashfs-root/AppRun new-session ';' detach ';' kill-server
   fail=$?
 fi
