@@ -63,21 +63,30 @@ jobs:
       - name: Add execution flag
         run: chmod +x build/Tmux-x86_64.AppImage
 
-      - name: Pull Docker image
-        run: docker pull ${{ matrix.image }}
-
-      - name: Install dependencies
+      - name: Build docker image
         run: |
+          mkdir -p build
+          echo "FROM ${{ matrix.image }}" > build/Dockerfile
           if [[ "${{ matrix.manager }}" == "apt" ]]; then
-            echo "PREREQUISITE=apt update -y; apt install -y fuse libfuse2" >> $GITHUB_ENV
+            echo "RUN apt update" >> build/Dockerfile
+            echo "RUN apt install -y fuse libfuse2" >> build/Dockerfile
           elif [[ "${{ matrix.manager }}" == "yum" || "${{ matrix.manager }}" == "dnf" ]]; then
-            echo "PREREQUISITE=${{ matrix.manager }} install -y fuse fuse-libs" >> $GITHUB_ENV
+            echo "RUN ${{ matrix.manager }} install -y fuse fuse-libs util-linux" >> build/Dockerfile
           elif [[ "${{ matrix.manager }}" == "pacman" ]]; then
-            echo "PREREQUISITE=pacman -Sy --noconfirm fuse" >> $GITHUB_ENV
+            echo "RUN pacman -Sy --noconfirm fuse" >> build/Dockerfile
           fi
+          echo "COPY scripts/docker-entrypoint.sh /usr/local/bin/" >> build/Dockerfile
+          echo "ENTRYPOINT [\"/usr/local/bin/docker-entrypoint.sh\"]" >> build/Dockerfile
+          echo "CMD [\"bash\"]" >> build/Dockerfile
+          docker build -t test-${{ matrix.image }} -f build/Dockerfile .
 
       - name: Test in Docker container
-        run: docker run -t --privileged -v $(pwd):$(pwd) -w $(pwd) ${{ matrix.image }} bash -i +m -e -c "eval \"${{ env.PREREQUISITE }}\"; TERM=tmux-256color ./scripts/test_tmux.sh build/Tmux-x86_64.AppImage $(cat packages/tmux.yaml | grep version | sed 's/.\+:\s//g')"
+        run: |
+          docker run --rm -t --cap-add SYS_ADMIN --device /dev/fuse --security-opt apparmor:unconfined \
+          -e TARGET_UID=$(id -u) \
+          -e TARGET_GID=$(id -g) \
+          -e TARGET_USER=$(id -un) \
+          -v $(pwd):$(pwd) -w $(pwd) test-${{ matrix.image }} bash -c "TERM=tmux-256color ./scripts/test_tmux.sh build/Tmux-x86_64.AppImage $(cat packages/tmux.yaml | grep version | sed 's/.\+:\s//g')"
 
   release:
     name: Release
