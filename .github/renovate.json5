@@ -29,8 +29,7 @@
                 'version:\\s(?<currentValue>.*?)\\n',
             ],
             datasourceTemplate: 'github-releases',
-            versioningTemplate: 'loose',
-            extractVersionTemplate: '^(?<version>\\d+\\.\\d+[a-z]?)$',
+            versioningTemplate: 'deb',
             packageNameTemplate: 'tmux/tmux',
         },
         {
