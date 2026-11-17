@@ -24,6 +24,9 @@ jobs:
         id: build_appimage
         run: make -j
 
+      - name: Test bundled runtime library paths
+        run: bash scripts/test_runtime_paths.sh build/Tmux-x86_64.AppImage "$(awk '/^version:/ {print $2}' packages/tmux.yaml)"
+
       - name: Upload artifacts
         if: steps.build_appimage.outcome == 'success'
         uses: actions/upload-artifact@v4

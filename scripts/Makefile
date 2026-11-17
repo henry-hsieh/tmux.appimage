@@ -10,7 +10,7 @@ utempter_ver := $(shell cat $(packages_dir)/utempter.yaml | grep version | sed '
 libevent_ver := $(shell cat $(packages_dir)/libevent.yaml | grep version | sed 's/.\+:\s//g')
 libevent_lib_ver := $(shell echo $(libevent_ver) | sed 's/\.[0-9]\+-stable//g')
 utf8proc_ver := $(shell cat $(packages_dir)/utf8proc.yaml | grep version | sed 's/.\+:\s//g')
-runtime_libs := libncursesw.so libtinfow.so libutempter.so libevent.so libutf8proc.so libevent-$(libevent_lib_ver).so
+runtime_libs := libncursesw.so libtinfow.so libutempter.so libevent.so libutf8proc.so libevent-$(libevent_lib_ver).so libevent_core-$(libevent_lib_ver).so
 runtime_libs_src := $(addprefix $(build_dir)/deps/lib/,$(runtime_libs))
 runtime_libs_dst := $(addprefix $(appimage_dir)/usr/lib/,$(runtime_libs))
 
@@ -67,10 +67,12 @@ $(build_dir)/deps/lib/libevent.so: | $(build_dir)/libevent-$(libevent_ver).tar.g
 		$(scripts_dir)/patch.sh libevent $(libevent_ver) $(build_dir); \
 		mkdir -p build; \
 		cd build; \
-		cmake ../ -DCMAKE_INSTALL_PREFIX=$(build_dir)/deps -DEVENT__DISABLE_OPENSSL=ON -DEVENT__DISABLE_TESTS=ON; \
+		cmake ../ -DCMAKE_INSTALL_PREFIX=$(build_dir)/deps -DCMAKE_SKIP_INSTALL_RPATH=ON -DEVENT__DISABLE_OPENSSL=ON -DEVENT__DISABLE_TESTS=ON; \
 		make -j install
 
 $(build_dir)/deps/lib/libevent-$(libevent_lib_ver).so: $(build_dir)/deps/lib/libevent.so
+
+$(build_dir)/deps/lib/libevent_core-$(libevent_lib_ver).so: $(build_dir)/deps/lib/libevent.so
 
 $(build_dir)/deps/lib/libutf8proc.so: | $(build_dir)/utf8proc-$(utf8proc_ver).tar.gz $(build_dir)/deps
 	@cd $(build_dir)/utf8proc-$(utf8proc_ver); \
@@ -106,6 +108,9 @@ $(appimage_dir)/usr/lib/%.so: $(build_dir)/deps/lib/%.so | $(appimage_dir)/usr/l
 
 $(appimage_dir)/usr/lib/libevent-$(libevent_lib_ver).so: $(build_dir)/deps/lib/libevent-$(libevent_lib_ver).so | $(appimage_dir)/usr/lib
 	/usr/bin/cp -P --preserve=mode,timestamps $(build_dir)/deps/lib/libevent-$(libevent_lib_ver).so* $(appimage_dir)/usr/lib/
+
+$(appimage_dir)/usr/lib/libevent_core-$(libevent_lib_ver).so: $(build_dir)/deps/lib/libevent_core-$(libevent_lib_ver).so | $(appimage_dir)/usr/lib
+	/usr/bin/cp -P --preserve=mode,timestamps $(build_dir)/deps/lib/libevent_core-$(libevent_lib_ver).so* $(appimage_dir)/usr/lib/
 
 # mkdir
 $(build_dir)/deps:
