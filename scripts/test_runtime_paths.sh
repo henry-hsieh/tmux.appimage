@@ -16,6 +16,17 @@ cd "$workdir"
 appdir="$workdir/squashfs-root"
 libdir="$appdir/usr/lib"
 
+core_libraries=("$libdir"/libevent_core-*.so.*)
+if [[ ! -e "${core_libraries[0]}" ]]; then
+  echo "Bundled libevent_core not found" >&2
+  exit 1
+fi
+glibc_version=$(readelf --version-info "${core_libraries[0]}" | awk '/Name: GLIBC_/ { sub(/GLIBC_/, "", $3); print $3 }' | sort -V | tail -n 1)
+if [[ -z "$glibc_version" || "$(printf '%s\n' 2.17 "$glibc_version" | sort -V | tail -n 1)" != 2.17 ]]; then
+  echo "Bundled libevent_core requires unsupported glibc version: ${glibc_version:-unknown}" >&2
+  exit 1
+fi
+
 for executable in tmux tput; do
   binary="$appdir/usr/bin/$executable"
   echo "Checking runtime paths for $executable"

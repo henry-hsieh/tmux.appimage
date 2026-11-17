@@ -10,7 +10,7 @@ utempter_ver := $(shell cat $(packages_dir)/utempter.yaml | grep version | sed '
 libevent_ver := $(shell cat $(packages_dir)/libevent.yaml | grep version | sed 's/.\+:\s//g')
 libevent_lib_ver := $(shell echo $(libevent_ver) | sed 's/\.[0-9]\+-stable//g')
 utf8proc_ver := $(shell cat $(packages_dir)/utf8proc.yaml | grep version | sed 's/.\+:\s//g')
-runtime_libs := libncursesw.so libtinfow.so libutempter.so libevent.so libutf8proc.so libevent-$(libevent_lib_ver).so
+runtime_libs := libncursesw.so libtinfow.so libutempter.so libevent.so libutf8proc.so libevent-$(libevent_lib_ver).so libevent_core-$(libevent_lib_ver).so
 runtime_libs_src := $(addprefix $(build_dir)/deps/lib/,$(runtime_libs))
 runtime_libs_dst := $(addprefix $(appimage_dir)/usr/lib/,$(runtime_libs))
 
@@ -72,6 +72,8 @@ $(build_dir)/deps/lib/libevent.so: | $(build_dir)/libevent-$(libevent_ver).tar.g
 
 $(build_dir)/deps/lib/libevent-$(libevent_lib_ver).so: $(build_dir)/deps/lib/libevent.so
 
+$(build_dir)/deps/lib/libevent_core-$(libevent_lib_ver).so: $(build_dir)/deps/lib/libevent.so
+
 $(build_dir)/deps/lib/libutf8proc.so: | $(build_dir)/utf8proc-$(utf8proc_ver).tar.gz $(build_dir)/deps
 	@cd $(build_dir)/utf8proc-$(utf8proc_ver); \
 		mkdir -p build; \
@@ -106,6 +108,9 @@ $(appimage_dir)/usr/lib/%.so: $(build_dir)/deps/lib/%.so | $(appimage_dir)/usr/l
 
 $(appimage_dir)/usr/lib/libevent-$(libevent_lib_ver).so: $(build_dir)/deps/lib/libevent-$(libevent_lib_ver).so | $(appimage_dir)/usr/lib
 	/usr/bin/cp -P --preserve=mode,timestamps $(build_dir)/deps/lib/libevent-$(libevent_lib_ver).so* $(appimage_dir)/usr/lib/
+
+$(appimage_dir)/usr/lib/libevent_core-$(libevent_lib_ver).so: $(build_dir)/deps/lib/libevent_core-$(libevent_lib_ver).so | $(appimage_dir)/usr/lib
+	/usr/bin/cp -P --preserve=mode,timestamps $(build_dir)/deps/lib/libevent_core-$(libevent_lib_ver).so* $(appimage_dir)/usr/lib/
 
 # mkdir
 $(build_dir)/deps:
