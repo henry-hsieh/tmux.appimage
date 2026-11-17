@@ -100,7 +100,7 @@
             matchDepNames: [
                 'tmux',
             ],
-            ignoreUnstable: false,
+            allowedVersions: '/^[0-9]+(\\.[0-9]+)*[a-z]?$/',
             commitMessagePrefix: 'feat({{depName}}):',
             commitMessageAction: 'update',
             commitBody: 'Release-As: {{newVersion}}',
