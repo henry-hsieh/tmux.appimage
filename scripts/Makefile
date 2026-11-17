@@ -67,7 +67,7 @@ $(build_dir)/deps/lib/libevent.so: | $(build_dir)/libevent-$(libevent_ver).tar.g
 		$(scripts_dir)/patch.sh libevent $(libevent_ver) $(build_dir); \
 		mkdir -p build; \
 		cd build; \
-		cmake ../ -DCMAKE_INSTALL_PREFIX=$(build_dir)/deps -DEVENT__DISABLE_OPENSSL=ON -DEVENT__DISABLE_TESTS=ON; \
+		cmake ../ -DCMAKE_INSTALL_PREFIX=$(build_dir)/deps -DCMAKE_SKIP_INSTALL_RPATH=ON -DEVENT__DISABLE_OPENSSL=ON -DEVENT__DISABLE_TESTS=ON; \
 		make -j install
 
 $(build_dir)/deps/lib/libevent-$(libevent_lib_ver).so: $(build_dir)/deps/lib/libevent.so
